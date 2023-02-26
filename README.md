@@ -17,7 +17,7 @@ A chat project with Vue & Nginx web and Golang & MySQL server parts in Docker co
 
     cd chat-project
 
-    docker-compose up --build
+    docker-compose up (need restart after build)
 ```
 
 ## Set up test database
