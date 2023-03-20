@@ -8,15 +8,19 @@
           style="margin-top: 48px"
           placeholder="Як тебе звати?"
           v-model="form.username"
+          @input="usernameValidate"
         ></el-input>
+        <div class="validate">{{ validateUsername }}</div>
         <el-input
           class="input"
           placeholder="Вигадай надійний пароль"
           v-model="form.password"
           show-password
+          @input="passwordValidate"
         ></el-input>
+        <div class="validate">{{ validatePassword }}</div>
         <div class="btns">
-          <el-button class="btn" v-on:click="signUpHandler"
+          <el-button class="btn" @click="signUpHandler"
             >Зареєструватися</el-button
           >
           <el-button class="btn" v-on:click="cancelHandler">Очистити</el-button>
@@ -26,6 +30,23 @@
         Вже маєте акаунт?
       </el-link>
     </div>
+    <div class="hint">
+<ul>
+  <div style="margin-bottom: 8px;">Ім'я має бути наступним:</div>
+  <li>Починатися лише з літери;</li>
+  <li>Може містити лише літери, цифри, та ' . ' чи ' _ ';</li>
+  <li>Унікальність імені не залежить від регістру;</li>
+  <li>Інші символи недопустимі;</li>
+</ul>
+<ul>
+  <div style="margin-bottom: 8px;">Пароль має бути наступним:</div>
+  <li>Має містити хоча б одну заголовну літеру;</li>
+  <li>Має містити хоча б одну малу літеру;</li>
+  <li>Має містити хоча б одну цифру;</li>
+  <li>Має містити хоча б однин спецсимвол;</li>
+  <li>Інші символи допустимі;</li>
+</ul>
+</div>
   </div>
 </template>
 
@@ -39,27 +60,75 @@ export default Vue.extend({
       username: string;
       password: string;
     };
+    validateUsername: string;
+    validatePassword: string;
   } {
     return {
       form: {
         username: "",
         password: "",
       },
+      validateUsername: "",
+      validatePassword: "",
     };
   },
   computed: {
-    ...mapGetters([
-      "USER_ID",
-      "USER"
-    ])
+    ...mapGetters(["USER_ID"]),
   },
   methods: {
-    signUpHandler() {
-      if (this.form.username === "") {
+    usernameValidate() {
+      if (this.form.username?.length == 0) {
+        this.validateUsername = "Введіть ім'я";
+        return;
+      }
+      if (!/^[a-zа-яА-ЯёЁїЇіІєЄA-Z0-9_.]+$/.test(this.form.username)) {
+        this.validateUsername = 'Дозволені лише літери, цифри, " . " або " _ "';
+        return;
+      }
+      if (!/^[a-zа-яА-ЯёЁїЇіІєЄA-Z]/.test(this.form.username)) {
+        this.validateUsername = "Ім'я повинно починатися з літери";
+        return;
+      }
+      if (this.form.username?.length < 3 || this.form.username?.length > 20) {
+        this.validateUsername = "Довжина має бути від 3 до 20 символів";
+        return;
+      }
+      this.validateUsername = "";
+    },
+    passwordValidate() {
+      if (this.form.password?.length == 0) {
+        this.validatePassword = "Введіть пароль";
+        return;
+      }
+      if (!/(?=.*[a-zа-яіІєЄёї])/.test(this.form.password)) {
+        this.validatePassword =
+          "Пароль повинен містити хоча б одну малу літеру";
+        return;
+      }
+      if (!/(?=.*[A-ZА-ЯіІєЄЁЇ])/.test(this.form.password)) {
+        this.validatePassword =
+          "Пароль повинен містити хоча б одну заголовну літеру";
+        return;
+      }
+      if (!/(?=.*[0-9])/.test(this.form.password)) {
+        this.validatePassword = "Пароль повинен містити хоча б одну цифру";
+        return;
+      }
+      if (!/(?=.*[!@#$%^&*])/.test(this.form.password)) {
+        this.validatePassword = "Пароль повинен містити хоча б один із спецсимволів [ ! @ # $ % ^ & * ]";
         return;
       }
       if (this.form.password?.length < 6) {
-        this.form.password = "";
+        this.validatePassword = "Довжина має бути від 6 символів";
+        return;
+      }
+      this.validatePassword = "";
+    },
+    signUpHandler() {
+      if (this.validateUsername != "" || this.validatePassword != "") return;
+      if (this.form.username == "" && this.form.password == "") {
+        this.usernameValidate();
+        this.passwordValidate();
         return;
       }
       this.$store
@@ -67,18 +136,24 @@ export default Vue.extend({
           username: this.form.username,
           password: this.form.password,
         })
-        .then(() => this.cancelHandler())
-        .then(()=> {
-          this.$store.dispatch("getUser", this.USER_ID)
-          .then((res) => {
-          this.$store.commit("setUser", res);
-          this.$router.push('/')
-          });
-        })
-       .then(() => {
-          })
-          },
+        .then((err) => {
+          if (err.status == 202) {
+            this.validateUsername = "Ім'я користувача вже зайняте";
+            return;
+          }
+          if (err.response?.status == 500) {
+            this.validateUsername = "Повторіть пізніше";
+            return;
+          }
+          this.cancelHandler();
+          if (this.$router.currentRoute.name != "default") {
+        this.$router.push("/");
+      }
+            });
+    },
     cancelHandler() {
+      this.validatePassword = "";
+      this.validateUsername = "";
       this.form.username = "";
       this.form.password = "";
     },
@@ -87,12 +162,13 @@ export default Vue.extend({
     },
   },
   watch: {
-    USER_ID(){
-      this.$router.push("/")
-    }
+    USER_ID() {
+      if (this.$router.currentRoute.name != "default") {
+        this.$router.push("/");
+      }
+    },
   },
 });
-
 </script>
 
 <style scoped>
@@ -109,6 +185,27 @@ export default Vue.extend({
   justify-content: center;
   display: flex;
   align-items: center;
+}
+
+.hint {
+  display: flex;
+  flex-direction: column;
+    font-size: 20px;
+    height: 90vh;
+    align-items: flex-start;
+    justify-content: center;
+}
+
+ul {
+text-align: start;
+margin-block-end: 0px;
+
+}
+
+li {
+  margin: 2px 0;
+  margin-left: 40px;
+    font-size: 16px;
 }
 
 :deep(.el-input) {
@@ -133,10 +230,18 @@ export default Vue.extend({
   color: #245f1a8c;
 }
 .btns {
+  margin-top: 20px;
   display: flex;
   justify-content: space-between;
 }
 
+.validate {
+  font-size: 14px;
+  color: red;
+  margin-top: -12px;
+  text-align: left;
+  padding-left: 16px;
+}
 .form {
   width: 360px;
 }

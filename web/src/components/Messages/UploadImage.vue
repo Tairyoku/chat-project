@@ -1,13 +1,12 @@
 <template>
   <div class="upload">
-    <div class="upload__image">
-      <div v-if="dialogVisible">
-        <i class="el-icon-plus" @click="uploadImage"></i>
+    <div class="upload__image" @click="uploadImage">
+      <div v-if="dialogVisible" >
+        <i class="el-icon-plus" ></i>
       </div>
       <img
         style="border-radius: 16px"
         width="100%"
-        @click="uploadImage"
         :src="imageSrc"
       />
     </div>

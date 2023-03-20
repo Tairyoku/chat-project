@@ -1,7 +1,6 @@
 version: '3.8'
 services:
     nginx:
-        #    image: 283158/vue-app-nginx
         build:
             context: ./web
         stdin_open: true

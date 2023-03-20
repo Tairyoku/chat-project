@@ -1,7 +1,6 @@
 import axiosInstanse from "@/api";
 import { IUser } from "../models";
 import { Module } from "vuex";
-import { RootState } from "../index"
 import {
     USER_DATA,
     SEARCH_USERS,
@@ -14,6 +13,7 @@ import {
     DELETE_FROM_BL,
     DELETE_FRIEND
 } from "@/api/routes";
+import RootState from "../types";
 
 export interface UsersState {
     // Список знайдених користувачів
@@ -134,7 +134,6 @@ const UsersModule: Module<UsersState, RootState> = ({
                 .then((res) => {
                     user = res.data.user;
                 })
-                .catch((err) => console.log(err));
             return new Promise((resolve, reject) => {
                 resolve(user);
             });
@@ -150,9 +149,6 @@ const UsersModule: Module<UsersState, RootState> = ({
                 .then((res) => {
                     this.commit("setSearchUsersList", res.data.list);
                 })
-                .catch((err) => {
-                    console.log(err);
-                });
         },
         /**
          * Оновлює списки усіх типів відносин користувача
@@ -171,9 +167,6 @@ const UsersModule: Module<UsersState, RootState> = ({
                     this.commit("setInvitationsList", res.data.requires);
                     this.commit("setFriendsList", res.data.friends);
                 })
-                .catch((err) => {
-                    console.log(err);
-                });
         },
         /**
          * Змінює статус відносин між активним користувачем та поданим у аргументі
@@ -185,11 +178,8 @@ const UsersModule: Module<UsersState, RootState> = ({
             await axiosInstanse
                 .post(ADD_FRIEND(userId))
                 .then(() => {
-                    this.dispatch("usersList", this.state.authState.userId);
+                    this.dispatch("usersList", this.getters.USER_ID);
                 })
-                .catch((err) => {
-                    console.log(err);
-                });
         },
         /**
      * Видаляє статус відносин між активним користувачем та поданим у аргументі
@@ -201,11 +191,8 @@ const UsersModule: Module<UsersState, RootState> = ({
             await axiosInstanse
                 .delete(CANCEL_INVITE(userId))
                 .then(() => {
-                    this.dispatch("usersList", this.state.authState.userId);
+                    this.dispatch("usersList", this.getters.USER_ID);
                 })
-                .catch((err) => {
-                    console.log(err);
-                });
         },
         /**
      * Змінює статус відносин між активним користувачем та поданим у аргументі
@@ -217,11 +204,8 @@ const UsersModule: Module<UsersState, RootState> = ({
             await axiosInstanse
                 .put(ACCEPT(userId))
                 .then(() => {
-                    this.dispatch("usersList", this.state.authState.userId);
+                    this.dispatch("usersList", this.getters.USER_ID);
                 })
-                .catch((err) => {
-                    console.log(err);
-                });
         },
         /**
  * Видаляє статус відносин між поданим у аргументі та активним користувачами 
@@ -233,11 +217,8 @@ const UsersModule: Module<UsersState, RootState> = ({
             await axiosInstanse
                 .delete(REFUSE(userId))
                 .then(() => {
-                    this.dispatch("usersList", this.state.authState.userId);
+                    this.dispatch("usersList", this.getters.USER_ID);
                 })
-                .catch((err) => {
-                    console.log(err);
-                });
         },
         /**
  * Змінює статус відносин між активним користувачем та поданим у аргументі
@@ -249,11 +230,8 @@ const UsersModule: Module<UsersState, RootState> = ({
             await axiosInstanse
                 .post(ADD_TO_BL(userId))
                 .then(() => {
-                    this.dispatch("usersList", this.state.authState.userId);
+                    this.dispatch("usersList", this.getters.USER_ID);
                 })
-                .catch((err) => {
-                    console.log(err);
-                });
         },
         /**
 * Видаляє статус відносин між поданим у аргументі та активним користувачами 
@@ -265,11 +243,8 @@ const UsersModule: Module<UsersState, RootState> = ({
             await axiosInstanse
                 .delete(DELETE_FROM_BL(userId))
                 .then(() => {
-                    this.dispatch("usersList", this.state.authState.userId);
+                    this.dispatch("usersList", this.getters.USER_ID);
                 })
-                .catch((err) => {
-                    console.log(err);
-                });
         },
         /**
 * Видаляє статус відносин між поданим у аргументі та активним користувачами 
@@ -281,10 +256,10 @@ const UsersModule: Module<UsersState, RootState> = ({
             await axiosInstanse
                 .delete(DELETE_FRIEND(userId))
                 .then(() => {
-                    this.dispatch("usersList", this.state.authState.userId);
+                    this.dispatch("usersList", this.getters.USER_ID);
                 })
                 .catch((err) => {
-                    console.log(err);
+                    // console.log(err);
                 });
         },
     },

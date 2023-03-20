@@ -29,22 +29,33 @@
     </div>
     <el-dialog
       title="Змінити ім'я"
-      :visible.sync="changeUsernameVisible"
-      width="400px"
+      width="440px"
       top="25vh"
-    >
+      :visible.sync="changeUsernameVisible"
+      >
       <el-form v-if="changeUsernameVisible" status-icon>
+        <el-form-item style="display: none;">
+          <el-input></el-input>
+        <div class="validate">{{ validateOldPassword }}</div>
+        </el-form-item>
         <el-form-item>
           <el-input
             type="text"
             v-model="newUsername"
-            autocomplete="off"
-          ></el-input>
+            @input="usernameValidate"
+        />
+        <!-- <input
+          class="el-input__inner"
+            type="text"
+            v-model="newUsername"
+            @input="usernameValidate"
+            @keyup.enter="changeUsernameHandler"
+        /> -->
+        <div class="validate">{{ validateUsername }}</div>
         </el-form-item>
         <el-form-item>
-          <el-button show-password @click="changeUsernameHandler">Змінити</el-button
-          >
-          <el-button @click="changeUsernameVisible = false">Назад</el-button>
+          <el-button @click="changeUsernameHandler">Змінити</el-button>
+          <el-button @click="changeUsernameVisible = false; newUsername = '';">Назад</el-button>
         </el-form-item>
       </el-form>
     </el-dialog>
@@ -54,7 +65,8 @@
       <el-col :span="8">
         <el-card shadow="hover">
           Змінити зображення
-          <i class="el-icon-circle-plus"></i>
+          <!-- <i class="el-icon-circle-plus"></i> -->
+          <i class="el-icon-picture"></i>
         </el-card>
       </el-col>
     </div>
@@ -78,7 +90,7 @@
     <el-dialog
       title="Змінити пароль"
       :visible.sync="changePasswordVisible"
-      width="400px"
+      width="440px"
       top="25vh"
     >
       <el-form 
@@ -91,7 +103,9 @@
             type="password"
             show-password
             v-model="passwordForm.oldPass"
-          ></el-input>
+            @input="validateOldPassword = ''"
+        ></el-input>
+        <div class="validate">{{ validateOldPassword }}</div>
         </el-form-item>
         <span class="menu__text">Новий пароль</span>
         <el-form-item>
@@ -99,7 +113,9 @@
             type="password"
             show-password
             v-model="passwordForm.newPass"
-          ></el-input>
+            @input="passwordValidate"
+        ></el-input>
+        <div class="validate">{{ validateNewPassword }}</div>
         </el-form-item>
         <el-form-item>
           <el-button show-password @click="changePasswordHandler">Змінити</el-button>
@@ -150,6 +166,9 @@ export default Vue.extend({
       changeIconVisible: boolean,
       changePasswordVisible: boolean,
       logoutVisible: boolean,
+      validateUsername: string,
+        validateOldPassword: string,
+        validateNewPassword: string,
       passwordForm: {
         oldPass: string,
         newPass: string,
@@ -163,7 +182,10 @@ export default Vue.extend({
       changeIconVisible: false,
       changePasswordVisible: false,
       logoutVisible: false,
-      passwordForm: {
+      validateUsername: "",
+      validateOldPassword: "",
+        validateNewPassword: "",
+  passwordForm: {
         oldPass: "",
         newPass: "",
       },
@@ -190,16 +212,71 @@ export default Vue.extend({
     },
   },
   methods: {
+    usernameValidate() {
+      if (this.newUsername?.length == 0) {
+        this.validateUsername = "Введіть ім'я"
+        return
+      }
+      if (!/^[a-zа-яА-ЯёЁїЇіІєЄA-Z0-9_.]+$/.test(this.newUsername)) {
+        this.validateUsername = "Дозволені лише літери, цифри, \" . \" або \" _ \""
+        return
+      }
+      if (!/^[a-zа-яА-ЯёЁїЇіІєЄA-Z]/.test(this.newUsername)) {
+        this.validateUsername = "Ім'я повинно починатися з літери"
+        return
+      }
+      if (this.newUsername?.length < 3 || this.newUsername?.length > 20) {
+        this.validateUsername = "Довжина має бути від 3 до 20 символів"
+        return
+      }
+      this.validateUsername = ""
+    },
+    passwordValidate() {
+      if (this.passwordForm.newPass?.length == 0) {
+        this.validateNewPassword = "Введіть пароль"
+        return
+      }
+      if (!/(?=.*[a-zа-яіІєЄёї])/.test(this.passwordForm.newPass)) {
+        this.validateNewPassword = "Пароль повинен містити хоча б одну малу літеру"
+        return
+      }
+      if (!/(?=.*[A-ZА-ЯіІєЄЁЇ])/.test(this.passwordForm.newPass)) {
+        this.validateNewPassword = "Пароль повинен містити хоча б одну заголовну літеру"
+        return
+      }
+      if (!/(?=.*[0-9])/.test(this.passwordForm.newPass)) {
+        this.validateNewPassword = "Пароль повинен містити хоча б одну цифру"
+        return
+      }
+      if (!/(?=.*[!@#$%^&*])/.test(this.passwordForm.newPass)) {
+        this.validateNewPassword = "Пароль повинен містити хоча б один спецсимвол"
+        return
+      }
+      if (this.passwordForm.newPass?.length < 6) {
+        this.validateNewPassword = "Довжина має бути від 6 символів"
+        return
+      }
+      this.validateNewPassword = ""
+    },
     changeUsernameHandler() {
-      this.changeUsernameVisible = false;
+        this.usernameValidate()
+      if (this.validateUsername != "") return;
       this.$store
-        .dispatch("changeUsername", {
-          username: this.newUsername,
-        })
-        .then(() => {
+      .dispatch("changeUsername", {
+        username: this.newUsername,
+      })
+      .then(err => {
+        if (err.status == 202) {
+          this.validateUsername = "Ім'я користувача вже зайняте"
+          return
+        }
+         if (err.response?.status == 500) {
+          this.validateUsername = "Повторіть пізніше"
+          return
+        } 
+        this.changeUsernameVisible = false;
           this.$notify({
             title: "Ім'я успішно змінено",
-            text: "Ім'я змінено",
             type: "success",
           });
           this.WEB_SOCKET.send("update");
@@ -208,21 +285,32 @@ export default Vue.extend({
         });
     },
     changePasswordHandler() {
-      this.changePasswordVisible = false;
+      this.passwordValidate()
+      if (this.validateOldPassword != "") return;
       this.$store
-        .dispatch("changePassword", {
-          oldPassword: this.passwordForm.oldPass,
-          newPassword: this.passwordForm.newPass,
-        })
-        .then(() => {
+      .dispatch("changePassword", {
+        oldPassword: this.passwordForm.oldPass,
+        newPassword: this.passwordForm.newPass,
+      })
+      .then(err => {
+        if (err.status == 202) {
+            this.validateOldPassword = "Невірний пароль"
+            return
+          }
+           if (err.response?.status == 500) {
+            this.validateOldPassword = "Повторіть пізніше"
+            return
+          }
+          this.changePasswordVisible = false;
           this.$notify({
             title: "Пароль успішно змінено",
-            text: "Пароль змінено",
             type: "success",
           });
         });
     },
     logoutHandler() {
+      this.logoutVisible = false
+      this.$emit('closeMenu')
       this.$store.dispatch("logout")
       .then(() => this.$router.push({ name: "sign-up" }));
     },
@@ -241,7 +329,7 @@ export default Vue.extend({
   color: #245f1a;
 }
 :deep(.el-input) {
-  width: 240px;
+  width: 300px;
   margin: 15px auto;
   position: relative;
   height: 40px;
@@ -254,6 +342,13 @@ export default Vue.extend({
 :deep(.el-input__inner:hover),
 :deep(.el-input__inner:focus) {
   border-color: #afec4d;
+}
+.validate {
+  font-size: 14px;
+    color: red;
+    margin-top: -30px;
+    text-align: left;
+    padding-left: 48px;
 }
 .menu__text {
   color: #245f1a;

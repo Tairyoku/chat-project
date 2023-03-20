@@ -1,22 +1,22 @@
 <template>
-    <div id="status-block">
-        <div class="status__friend" v-if="isFriendList">
-            <span>Друг</span>
-            <i class="el-icon-circle-check"></i>
-        </div>
-        <div class="status__BL" v-if='isInBlackList'>
+  <div id="status-block">
+           <div class="status__BL" v-if='isInBlackList'>
             <span>Заблокован</span>
             <i class="el-icon-circle-close"></i>
         </div>
-        <div class="status__onBL" v-if='hasYouOnBlackList'>
+        <div class="status__friend" v-else-if="isFriendList">
+            <span>Друг</span>
+            <i class="el-icon-circle-check"></i>
+        </div>
+        <!-- <div class="status__onBL" v-if='hasYouOnBlackList'>
             <span>у блоці</span>
             <i class="el-icon-warning-outline"></i>
-        </div>
-        <div class="status__invite" v-if='hasYourFriendshipRequire'>
+        </div> -->
+        <div class="status__invite" v-else-if='hasYourFriendshipRequire'>
             <span>Запрошено</span>
             <i class="el-icon-question"></i>
         </div>
-        <div class="status__invite" v-if='friendshipRequire'>
+        <div class="status__invite" v-else-if='friendshipRequire'>
             <span>Запит</span>
             <i class="el-icon-question"></i>
         </div>
@@ -45,9 +45,9 @@ import { mapGetters } from "vuex";
       isInBlackList():boolean {
         return this.ID_LIST_OF_BLACK_LIST.includes(this.id)
       },
-      hasYouOnBlackList():boolean {
-        return this.ID_LIST_OF_ON_BLACK_LISTS.includes(this.id)
-      },
+      // hasYouOnBlackList():boolean {
+      //   return this.ID_LIST_OF_ON_BLACK_LISTS.includes(this.id)
+      // },
       hasYourFriendshipRequire():boolean {
         return this.ID_LIST_OF_SENT_INVITES_TO_FRIENDS.includes(this.id)
       },
@@ -85,13 +85,13 @@ border-radius: 4px;
 padding: 4px;
 border: 0.5px solid rgb(217, 34, 34, 0.7);
   }
-  .status__onBL {
+  /* .status__onBL {
     color: rgb(236, 112, 17);
 border-radius: 4px;
     background-color: rgba(236, 112, 17, 0.2);
     padding: 4px;
 border: 0.5px solid rgb(236, 112, 17, 0.7);
-  }
+  } */
   .status__invite {
 border-radius: 4px;
     color: rgb(19, 137, 184);

@@ -16,7 +16,7 @@
       />
       <div v-if="isMenu" @mouseleave="setIsMenuVisible">
         <PrivateMenu v-if="user.id != USER_ID" />
-        <PersonalMenu v-else />
+        <PersonalMenu v-else @closeMenu="isMenu = false" />
       </div>
     </div>
   </div>
@@ -72,7 +72,7 @@ export default Vue.extend({
       if (this.USER_ID != 0 && this.CHAT_ID != 0) {
         this.$store.dispatch("getById", this.CHAT_ID)
         .then((res) => {
-          this.user = res.user
+            this.user = res.user
           this.chat = res.chat
         });
       }

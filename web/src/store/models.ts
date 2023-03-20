@@ -10,7 +10,7 @@ export interface IUser {
     author: number,
     chat_id: number,                     
     text: string,
-    sent_at: Date,                       
+    sent_at: string,                       
    }
 
    export interface IChat {

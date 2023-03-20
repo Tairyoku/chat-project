@@ -19,7 +19,7 @@
     </el-dialog>
 
     <!-- Додати до чату -->
-    <div @click="addToChatVisible = true">
+    <div v-if="getIsOnChat" @click="addToChatVisible = true">
       <el-col :span="8">
         <el-card shadow="hover">
           Додати до чату
@@ -37,7 +37,7 @@
     </el-dialog>
 
     <!-- Покинути чат -->
-    <div @click="wantLeaveVisible = true">
+    <div v-if="getIsOnChat" @click="wantLeaveVisible = true">
       <el-col :span="8">
         <el-card shadow="hover">
           Покинути чат
@@ -61,7 +61,7 @@
     </el-dialog>
 
     <!-- Змінити зображення -->
-    <div @click="changeIconVisible = true">
+    <div v-if="getIsOnChat" @click="changeIconVisible = true">
       <el-col :span="8">
         <el-card shadow="hover">
           Змінити зображення
@@ -78,7 +78,7 @@
     </el-dialog>
 
     <!-- Видалити чат -->
-    <div @click="deleteChatVisible = true">
+    <div v-if="getIsOnChat" @click="deleteChatVisible = true">
       <el-col :span="8">
         <el-card shadow="hover">
           Видалити чат
@@ -109,6 +109,7 @@ import { mapGetters } from "vuex";
 import Search from "@/components/Messages/Public/Search.vue";
 import UploadImage from "@/components/Messages/UploadImage.vue";
 import PublicInfo from "@/components/Messages/Public/PublicInfo.vue";
+import { IUser } from "@/store/models";
 
 export default Vue.extend({
   props: {
@@ -120,6 +121,7 @@ export default Vue.extend({
       changeIconVisible: boolean,
       wantLeaveVisible: boolean,
       deleteChatVisible: boolean,
+      usersList: IUser[],
     } {
     return {
       moreInfoVisible: false,
@@ -127,6 +129,7 @@ export default Vue.extend({
       changeIconVisible: false,
       wantLeaveVisible: false,
       deleteChatVisible: false,
+      usersList: [] as IUser[],
     };
   },
   components: {
@@ -136,9 +139,25 @@ export default Vue.extend({
   },
   computed: {
     ...mapGetters(["CHAT_ID", "USER_ID", "WEB_SOCKET"]),
+    getIsOnChat(): boolean {
+      let list: number[] = [];
+      this.usersList.forEach((item) => list.push(item.id));
+      return list.includes(this.USER_ID);
+    },
+  },
+  watch: {
+    CHAT_ID() {
+      this.getUsersList()
+    }
   },
   methods: {
+    getUsersList() {
+      this.$store
+        this.$store.dispatch("getChatUsers", this.CHAT_ID)
+    .then((res) => this.usersList = res.list);
+    },
     deleteChat() {
+      this.deleteChatVisible = false;
       this.$store
       .dispatch("deleteChat", this.CHAT_ID)
       .then(() => {
@@ -147,13 +166,13 @@ export default Vue.extend({
           text: "Чат видалено",
           type: "success",
         });
-        this.WEB_SOCKET.send("block");
         this.$router.push("/");
-        this.deleteChatVisible = false;
+        this.WEB_SOCKET.send("block");
+        this.$store.commit("closeSocket");
       });
     },
     leaveChat() {
-      this.deleteChatVisible = false;
+      this.wantLeaveVisible = false;
       this.$store
         .dispatch("deleteUserFromChat", {
           userId: this.USER_ID,
@@ -167,10 +186,14 @@ export default Vue.extend({
             type: "success",
           });
           this.WEB_SOCKET.send("block");
-          this.$router.push("/");
+          // this.$store.commit("closeSocket");
+          // this.$router.push("/");
         });
     },
   },
+  mounted() {
+this.getUsersList()
+  }
 });
 </script>
 
@@ -216,11 +239,7 @@ export default Vue.extend({
 :deep(.el-input__inner:focus) {
   border-color: #afec4d;
 }
-:deep(.el-button:hover) {
-  color: #e0ce2b;
-  border-color: #eeff25;
-  background-color: #fbff8580;
-}
+
 :deep(.el-button) {
   font-size: 20px;
   margin: 8px 16px;

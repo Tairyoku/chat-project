@@ -50,13 +50,13 @@ func (h *AuthHandler) SignUp(c echo.Context) error {
 	{
 		//username is not empty
 		if len(input.Username) == 0 {
-			responses.NewErrorResponse(c, http.StatusBadRequest, "You must enter a username")
+			responses.NewErrorResponse(c, http.StatusAccepted, "You must enter a username")
 			return nil
 		}
 
 		// password length
 		if len(input.Password) < 6 {
-			responses.NewErrorResponse(c, http.StatusBadRequest, "Password must be at least 6 symbols")
+			responses.NewErrorResponse(c, http.StatusAccepted, "Password must be at least 6 symbols")
 			return nil
 		}
 	}
@@ -65,7 +65,7 @@ func (h *AuthHandler) SignUp(c echo.Context) error {
 	_, errUser := h.services.Authorization.CreateUser(input)
 	// При спробі створення користувача з однаковим ім'ям викличеться помилка
 	if errUser != nil {
-		responses.NewErrorResponse(c, http.StatusConflict, "username is already used")
+		responses.NewErrorResponse(c, http.StatusAccepted, "username is already used")
 		return nil
 	}
 
@@ -115,20 +115,16 @@ func (h *AuthHandler) SignIn(c echo.Context) error {
 	}
 
 	//Перевіряємо чи існує користувач за його іменем
-	user, errCheck := h.services.Authorization.GetByName(input.Username)
+	_, errCheck := h.services.Authorization.GetByName(input.Username)
 	if errCheck != nil {
-		responses.NewErrorResponse(c, http.StatusInternalServerError, "check user error")
-		return nil
-	}
-	if user.Username == "" {
-		responses.NewErrorResponse(c, http.StatusNotFound, "user not found")
+		responses.NewErrorResponse(c, http.StatusAccepted, "user not found")
 		return nil
 	}
 
 	// Генеруємо токен (якщо ім'я та пароль правильні)
 	token, err := h.services.Authorization.GenerateToken(input.Username, input.Password)
 	if err != nil {
-		responses.NewErrorResponse(c, http.StatusConflict, "incorrect password")
+		responses.NewErrorResponse(c, http.StatusAccepted, "incorrect password")
 		return nil
 	}
 
@@ -157,7 +153,7 @@ func (h *AuthHandler) GetMe(c echo.Context) error {
 	userId := c.Get(middlewares.UserCtx)
 
 	if userId == 0 {
-		responses.NewErrorResponse(c, http.StatusNotFound, "user not found")
+		responses.NewErrorResponse(c, http.StatusNoContent, "user not found")
 		return nil
 	}
 
@@ -218,7 +214,7 @@ func (h *AuthHandler) ChangePassword(c echo.Context) error {
 	//Перевіряємо вірність введеного паролю
 	_, errCheck := h.services.Authorization.GenerateToken(user.Username, passwords.OldPassword)
 	if errCheck != nil {
-		responses.NewErrorResponse(c, http.StatusBadRequest, "incorrect password")
+		responses.NewErrorResponse(c, http.StatusAccepted, "incorrect password")
 		return nil
 	}
 
@@ -278,7 +274,7 @@ func (h *AuthHandler) ChangeUsername(c echo.Context) error {
 	//Якщо ім'я не зайняте, повернеться помилка
 	_, errCheck := h.services.Authorization.GetByName(username.Username)
 	if errCheck == nil {
-		responses.NewErrorResponse(c, http.StatusInternalServerError, "username is used")
+		responses.NewErrorResponse(c, http.StatusAccepted, "username is used")
 		return nil
 	}
 
@@ -331,7 +327,7 @@ func (h *AuthHandler) ChangeIcon(c echo.Context) error {
 
 	//Замінюємо дані у БД
 	var oldIcon = user.Icon
-	user.Icon = strings.TrimPrefix(fileName, "uploads\\")
+	user.Icon = strings.TrimPrefix(fileName, "uploads/")
 	errPut := h.services.Authorization.UpdateData(user)
 	if errPut != nil {
 		responses.NewErrorResponse(c, http.StatusInternalServerError, "update icon error")

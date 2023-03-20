@@ -34,6 +34,7 @@
 import Vue from "vue";
 import { IMAGE_SMALL } from "@/api/routes";
 import { IChat, IUser } from "@/store/models";
+import { mapGetters } from "vuex";
 
 export default Vue.extend({
   props: {
@@ -52,6 +53,7 @@ export default Vue.extend({
     };
   },
   computed: {
+    ...mapGetters(["UPDATER",]),
     getImageUrl(): string {
       if (this.user.icon) return IMAGE_SMALL(this.user.icon);
       return ""
@@ -68,6 +70,11 @@ export default Vue.extend({
       this.getChat()
       this.getTime()
     },
+    UPDATER() {
+      this.getUser();
+      this.getChat()
+      this.getTime()
+    }
   },
   methods: {
     isBottomLeftRadiusEnable() {
@@ -103,7 +110,6 @@ export default Vue.extend({
 .user__data {
   display: flex;
   background-color: #d5d54070;
-  box-shadow: 0px 0px 10px rgb(173 255 0 / 51%);
   padding: 8px 16px;
   border-radius: 8px;
 }
@@ -139,7 +145,7 @@ export default Vue.extend({
   text-overflow: ellipsis;
   overflow-wrap: break-word;
   width: 80%;
-  font-size: 16px;
+  font-size: 18px;
 }
 .user__time {
   text-align: right;

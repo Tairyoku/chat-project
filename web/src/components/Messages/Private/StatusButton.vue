@@ -67,7 +67,6 @@ export default Vue.extend({
   },
   methods: {
     updateData() {
-      this.$store.dispatch("usersList", this.USER_ID);
       this.WEB_SOCKET.send("update info");
     },
     cancelInvite() {

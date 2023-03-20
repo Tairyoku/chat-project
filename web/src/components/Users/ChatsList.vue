@@ -38,6 +38,8 @@ export default Vue.extend({
         this.$router
           .push(`/chat/${chatId}`)
           .then(() => this.$store.commit("setChatId", chatId));
+      this.$store.dispatch("usersList", this.USER_ID);
+
       }
     },
   },
@@ -63,7 +65,7 @@ ul {
 .chatlist {
   overflow-x: hidden;
   overflow-y: auto;
-  height: calc(100vh - 20px - 40px - 64.8px - 44px);
+  height: calc(100vh - 20px - 44px - 64.8px - 44px);
 }
 
 .chatlist::-webkit-scrollbar {

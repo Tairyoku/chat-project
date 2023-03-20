@@ -3,13 +3,22 @@
     <div class="scroll" ref="changeMessage" v-if="scrollHandler">
       <i class="el-icon-loading" v-if="loaderVisible"></i>
     </div>
-    <ul id="list">
+      <ul id="list">
       <li
         v-for="(message, index) in MESSAGE_LIST"
         :key="message.id"
       >
-        <PersonalMessage v-if="message.author == USER_ID" :message="message" :tail="isLast(message, index)" />
-        <UsersMessage v-else :message="message" :tail="isLast(message, index)" />
+      <MessageDate :message="message" v-if="getDate(message, index)" />
+        <PersonalMessage 
+        v-if="message.author == USER_ID" 
+        :tail="isLast(message, index)" 
+        :message="message" 
+        />
+        <UsersMessage 
+        v-else 
+        :message="message" 
+        :tail="isLast(message, index)" 
+        />
       </li>
     </ul>
     <div id="arrowTop"></div>
@@ -20,6 +29,7 @@
 import Vue from "vue";
 import { mapGetters } from "vuex";
 import { IMessage } from "@/store/models";
+import MessageDate from "./MessageDate.vue";
 import UsersMessage from "@/components/Messages/UsersMessage.vue";
 import PersonalMessage from "@/components/Messages/PersonalMessage.vue";
 const minLimit = 8;
@@ -44,6 +54,7 @@ export default Vue.extend({
   components: {
     PersonalMessage,
     UsersMessage,
+    MessageDate
   },
   computed: {
     ...mapGetters(["MESSAGE_LIST", "CHAT_ID", "USER_ID"]),
@@ -87,6 +98,17 @@ export default Vue.extend({
       });
       observer.observe(this.$refs.changeMessage as Element);
     },
+    getDate(message: IMessage, index: number): boolean {
+      if (index == 0) return true;
+      let date = new Date(Date.parse(message.sent_at));
+      let listDate = new Date(Date.parse(this.MESSAGE_LIST[index - 1].sent_at));
+      if (date.getMonth() != listDate.getMonth()) {
+        return true;
+      } else if (date.getDate() != listDate.getDate()) {
+        return true;
+      }
+      return false;
+    },
   },
   mounted() {
     this.scrollTrigger();
@@ -107,10 +129,12 @@ ul {
 }
 #list {
   width: calc(50vw - 1em - 4px);
-  display: flex;
-  flex-direction: column;
+    display: flex;
+    align-self: end;
+    min-height: 56vh;
+    flex-direction: column;
+    justify-content: flex-end;
 }
-
 .messages {
   overflow-x: hidden;
   overflow-y: auto;

@@ -5,9 +5,11 @@ const axiosInstanseFormData = axios.create({
   headers: {
     "Access-Control-Allow-Origin":'*',
     'Accept': 'multipart/form-data',
-    'Authorization': window.localStorage.getItem('token'),
+    // 'Authorization': window.localStorage.getItem('token'),
     'Content-Type': 'multipart/form-data',
   }
 });
+
+axiosInstanseFormData.defaults.headers.common.Authorization = window.localStorage.getItem("token")
 
 export default axiosInstanseFormData;

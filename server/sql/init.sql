@@ -3,7 +3,8 @@ create table if not exists users(
         username varchar(50) not null,
     password_hash varchar(100) not null,
     icon varchar(50),
-    unique(id, username)
+    unique(id),
+    unique(username)
     )
     engine = InnoDB;
 

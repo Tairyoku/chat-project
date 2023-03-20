@@ -207,9 +207,11 @@ func (h *UsersHandler) CancelInvite(c echo.Context) error {
 
 	// Видаляємо відносини за моделлю
 	err := h.services.Status.DeleteStatus(status)
-	if err != nil {
-		responses.NewErrorResponse(c, http.StatusInternalServerError, "delete status error")
-		return nil
+	if err.Error() != "record not found" {
+		if err != nil {
+			responses.NewErrorResponse(c, http.StatusInternalServerError, "delete status error")
+			return nil
+		}
 	}
 
 	// Відгук сервера
@@ -301,9 +303,11 @@ func (h *UsersHandler) RefuseInvitation(c echo.Context) error {
 
 	// Видаляємо відносини за моделлю
 	err := h.services.Status.DeleteStatus(status)
-	if err != nil {
-		responses.NewErrorResponse(c, http.StatusInternalServerError, "delete status error")
-		return nil
+	if err.Error() != "record not found" {
+		if err != nil {
+			responses.NewErrorResponse(c, http.StatusInternalServerError, "delete status error")
+			return nil
+		}
 	}
 
 	// Відгук сервера
@@ -348,9 +352,24 @@ func (h *UsersHandler) DeleteFriend(c echo.Context) error {
 
 	// Видаляємо відносини за моделлю
 	err := h.services.Status.DeleteStatus(status)
-	if err != nil {
-		responses.NewErrorResponse(c, http.StatusInternalServerError, "delete status error")
-		return nil
+	if err.Error() != "record not found" {
+		if err != nil {
+			responses.NewErrorResponse(c, http.StatusInternalServerError, "delete status error")
+			return nil
+		}
+	}
+
+	// Заповнюємо модель відносин
+	status.SenderId = recipientId
+	status.RecipientId = senderId
+
+	// Видаляємо відносини за моделлю
+	err = h.services.Status.DeleteStatus(status)
+	if err.Error() != "record not found" {
+		if err != nil {
+			responses.NewErrorResponse(c, http.StatusInternalServerError, "delete status error")
+			return nil
+		}
 	}
 
 	// Відгук сервера
@@ -442,9 +461,11 @@ func (h *UsersHandler) DeleteFromBlacklist(c echo.Context) error {
 
 	// Видаляємо відносини за моделлю
 	err := h.services.Status.DeleteStatus(status)
-	if err != nil {
-		responses.NewErrorResponse(c, http.StatusInternalServerError, "delete status error")
-		return nil
+	if err.Error() != "record not found" {
+		if err != nil {
+			responses.NewErrorResponse(c, http.StatusInternalServerError, "delete status error")
+			return nil
+		}
 	}
 
 	// Відгук сервера

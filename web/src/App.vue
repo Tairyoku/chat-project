@@ -13,17 +13,29 @@ export default Vue.extend ({
   components: { 
     MainView 
 },
-
 created() {
   this.$store.dispatch('getStarted')
+
 },  
+// mounted() {
+//   window.addEventListener('resize', this.handleResize);
+// },
+// methods: {
+//   handleResize() {
+//   this.$store.commit('incrimentUpdater')
+//   }
+// },
+// beforeDestroy() {
+//   window.removeEventListener('resize', this.handleResize);
+// }
 });
 </script>
  
 <style>
 #app {
-  font-family: 'Work Sans', sans-serif;
-      -webkit-font-smoothing: antialiased;
+  /* font-family: 'Work Sans', sans-serif; */
+  font-family: 'Commissioner', sans-serif; 
+  -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #14340e;

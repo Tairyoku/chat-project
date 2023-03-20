@@ -8,13 +8,17 @@
           style="margin-top: 48px"
           placeholder="Як тебе звати?"
           v-model="form.username"
+          @input="usernameValidate"
         ></el-input>
+        <div class="validate">{{ validateUsername }}</div>
         <el-input
           class="input"
           placeholder="Згадай свій пароль"
           v-model="form.password"
+          @input="passwordValidate"
           show-password
         ></el-input>
+        <div class="validate">{{ validatePassword }}</div>
         <div class="btns">
           <el-button class="btn" v-on:click="signInHandler">Увійти</el-button>
           <el-button class="btn" v-on:click="cancelHandler">Очистити</el-button>
@@ -24,6 +28,23 @@
          Ще не маєте акаунту?
         </el-link>
     </div>
+    <div class="hint">
+<ul>
+  <div style="margin-bottom: 8px;">Ім'я має бути наступним:</div>
+  <li>Починатися лише з літери;</li>
+  <li>Може містити лише літери, цифри, та ' . ' чи ' _ ';</li>
+  <li>Унікальність імені не залежить від регістру;</li>
+  <li>Інші символи недопустимі;</li>
+</ul>
+<ul>
+  <div style="margin-bottom: 8px;">Пароль має бути наступним:</div>
+  <li>Має містити хоча б одну заголовну літеру;</li>
+  <li>Має містити хоча б одну малу літеру;</li>
+  <li>Має містити хоча б одну цифру;</li>
+  <li>Має містити хоча б однин спецсимвол;</li>
+  <li>Інші символи допустимі;</li>
+</ul>
+</div>
   </div>
 </template>
 
@@ -37,34 +58,71 @@ export default Vue.extend({
       username: string;
       password: string;
     };
+    validateUsername: string,
+        validatePassword: string,
   } {
     return {
       form: {
         username: "",
         password: "",
       },
+        validateUsername: "",
+        validatePassword: "",
     };
   },
+  computed: {
+    ...mapGetters([
+      "USER_ID"
+    ])
+  },
   methods: {
+    usernameValidate() {
+      this.validatePassword = ""
+      if (this.form.username?.length == 0) {
+        this.validateUsername = "Введіть ім'я"
+        return
+      }
+      this.validateUsername = ""
+    },
+    passwordValidate() {
+      if (this.form.password?.length == 0) {
+        this.validatePassword = "Введіть пароль"
+        return
+      }
+      this.validatePassword = ""
+    },
     signInHandler() {
-      if (this.form.username === "") return
-      if (this.form.password?.length < 6) {
-        this.form.password = "";
+      if (this.validateUsername != "" || this.validatePassword != "") return;
+      if (this.form.username == "" && this.form.password == "") {
+       this.usernameValidate()
+       this.passwordValidate()
         return;
       }
-      this.$store
+       this.$store
         .dispatch("login", {
           username: this.form.username,
           password: this.form.password,
         })
-        .then(() => this.cancelHandler())
-       .then((res) => {
-          this.$store.dispatch("getStarted")
-          .then(() => this.$router.push('/'))
-       })
+        .then(err => {
+          if (err == "incorrect password") {
+            this.validatePassword = "Невірний пароль"
+            return
+        } else if (err == "user not found") {
+            this.validateUsername = "Користувача не існує"
+            return
+          } else if (err.response?.status == 500) {
+            this.validateUsername = "Повторіть пізніше"
+            return
+          }
+         this.cancelHandler()
+         if (this.$router.currentRoute.name != "default") {
+        this.$router.push("/");
+      }       })
     },
     cancelHandler() {
-      this.form.username = "";
+      this.validatePassword = ""
+      this.validateUsername = ""
+ this.form.username = "";
       this.form.password = "";
     },
     signUpNavigate() {
@@ -72,18 +130,12 @@ export default Vue.extend({
     },
   },
   watch: {
-    USER_ID(){
-      this.$router.push("/")
-    }
+    USER_ID() {
+      if (this.$router.currentRoute.name != "default") {
+        this.$router.push("/");
+      }
+    },
   },
-  computed: {
-    ...mapGetters([
-      "USER_ID"
-    ])
-  },
-  mounted() {
-    if (this.USER_ID) this.$router.push("/")
-  }
 });
 </script>
 
@@ -101,6 +153,27 @@ export default Vue.extend({
   justify-content: center;
   display: flex;
   align-items: center;
+}
+
+.hint {
+  display: flex;
+  flex-direction: column;
+    font-size: 20px;
+    height: 90vh;
+    align-items: flex-start;
+    justify-content: center;
+}
+
+ul {
+text-align: start;
+margin-block-end: 0px;
+
+}
+
+li {
+  margin: 2px 0;
+  margin-left: 40px;
+    font-size: 16px;
 }
 
 :deep(.el-input) {
@@ -121,10 +194,17 @@ export default Vue.extend({
   margin-left: -20px;
   color: #245f1ab0;
 }
-
 .btns {
+  margin-top: 20px;
   display: flex;
   justify-content: space-between;
+}
+.validate {
+  font-size: 14px;
+    color: red;
+    margin-top: -12px;
+    text-align: left;
+    padding-left: 16px;
 }
 
 .form {
@@ -156,7 +236,7 @@ export default Vue.extend({
 :deep(.el-input__inner:hover) {
   border-color: #afec4d;
 }
-:deep(.el-button:hover),
+:deep(.el-button:focus),
 :deep(.el-button:hover) {
   color: #e0ce2b;
   border-color: #eeff25;

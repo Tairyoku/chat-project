@@ -96,7 +96,7 @@ export default Vue.extend({
   justify-content: center;
   text-align: center;
   align-items: center;
-  font-size: 28px;
+    font-size: 18px;
   height: 60px;
   width: 60px;
   border-radius: 30px;
@@ -124,7 +124,6 @@ export default Vue.extend({
   align-items: flex-start;
 }
 .container__name {
-  margin-left: 8px;
   width: 100%;
   font-size: larger;
   text-align: center;

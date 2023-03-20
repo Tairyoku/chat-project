@@ -53,6 +53,7 @@ export default Vue.extend({
   text-align: justify;
   text-overflow: ellipsis;
   overflow-wrap: break-word;
+  font-size: 18px;
   width: 80%;
 }
 .personal__time {

@@ -104,7 +104,7 @@ func (h *ChatHandler) GetChat(c echo.Context) error {
 	// Отримує дані чату за його ID
 	chat, err := h.services.Chat.Get(id)
 	if err != nil {
-		responses.NewErrorResponse(c, http.StatusInternalServerError, "get chat error")
+		responses.NewErrorResponse(c, http.StatusNoContent, "get chat error")
 		return nil
 	}
 
@@ -145,7 +145,7 @@ func (h *ChatHandler) GetById(c echo.Context) error {
 	// Отримання даних чату
 	chat, err := h.services.Chat.Get(chatId)
 	if err != nil {
-		responses.NewErrorResponse(c, http.StatusInternalServerError, "no chat error")
+		responses.NewErrorResponse(c, http.StatusNoContent, "no chat error")
 		return nil
 	}
 
@@ -298,6 +298,7 @@ func (h *ChatHandler) GetUserPrivateChats(c echo.Context) error {
 			for _, u := range users {
 				if u.Id != creatorId {
 					chat.Name = u.Username
+					chat.Icon = u.Icon
 					result = append(result, chat)
 				}
 			}
@@ -424,6 +425,13 @@ func (h *ChatHandler) DeleteUserFromChat(c echo.Context) error {
 			responses.NewErrorResponse(c, http.StatusInternalServerError, "messages delete error")
 			return nil
 		}
+		// Відгук сервера
+		errRes := c.JSON(http.StatusAccepted, map[string]interface{}{
+			"message": fmt.Sprintf("user with id %d deleted from chat with id %d", list.UserId, chatId),
+		})
+		if errRes != nil {
+			return errRes
+		}
 	}
 	// Відгук сервера
 	errRes := c.JSON(http.StatusOK, map[string]interface{}{
@@ -480,11 +488,11 @@ func (h *ChatHandler) ChangeChatIcon(c echo.Context) error {
 
 	//Видалення застарілих файлів
 	if len(oldIcon) != 0 {
-		if err := os.Remove(fmt.Sprintf("uploads\\%s", oldIcon)); err != nil {
+		if err := os.Remove(fmt.Sprintf("uploads/%s", oldIcon)); err != nil {
 			responses.NewErrorResponse(c, http.StatusInternalServerError, "delete icon error")
 			return nil
 		}
-		if err := os.Remove(fmt.Sprintf("uploads\\resize-%s", oldIcon)); err != nil {
+		if err := os.Remove(fmt.Sprintf("uploads/resize-%s", oldIcon)); err != nil {
 			responses.NewErrorResponse(c, http.StatusInternalServerError, "delete icon error")
 			return nil
 		}

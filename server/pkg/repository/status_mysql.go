@@ -30,14 +30,14 @@ func (s *StatusRepository) GetStatuses(senderId, recipientId int) ([]models.Stat
 
 // UpdateStatus отримує ID двох користувачів та їх тип відносин ТА оновлює дані
 func (s *StatusRepository) UpdateStatus(status models.Status) error {
-	err := s.db.Table(StatusesTable).Updates(&status).Error
+	err := s.db.Table(StatusesTable).Where("sender_id = ? and recipient_id = ?", status.SenderId, status.RecipientId).Updates(&status).Error
 	return err
 }
 
 // DeleteStatus отримує ID двох користувачів та їх тип відносин ТА видаляє ці відносини
 func (s *StatusRepository) DeleteStatus(status models.Status) error {
-	query := fmt.Sprintf("DELETE FROM %s stl WHERE relationship = ? and (recipient_id = ? and sender_id = ?) or (sender_id = ? and recipient_id = ?)", StatusesTable)
-	err := s.db.Raw(query, status.Relationship, status.SenderId, status.RecipientId, status.SenderId, status.RecipientId).Scan(&status).Error
+	query := fmt.Sprintf("DELETE FROM %s WHERE (relationship = ? and sender_id = ? and recipient_id = ?)", StatusesTable)
+	err := s.db.Raw(query, status.Relationship, status.SenderId, status.RecipientId).Scan(&status).Error
 	return err
 }
 
@@ -110,7 +110,7 @@ func (s *StatusRepository) GetInvites(userId int) ([]models.User, error) {
 // мають збіг з аргументом
 func (s *StatusRepository) SearchUser(username string) ([]models.User, error) {
 	var users []models.User
-	query := fmt.Sprintf("SELECT id, username, icon FROM %s WHERE username LIKE ?", UsersTable)
+	query := fmt.Sprintf("SELECT id, username, icon FROM %s WHERE username LIKE ? LIMIT 16", UsersTable)
 	err := s.db.Raw(query, fmt.Sprintf("%%%s%%", username)).Scan(&users).Error
 	return users, err
 }

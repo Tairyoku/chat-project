@@ -104,7 +104,8 @@ func (c *ChatRepository) DeleteUser(userId, chatId int) error {
 // назви яких збігаються з аргументом
 func (c *ChatRepository) SearchChat(name string) ([]models.Chat, error) {
 	var chats []models.Chat
-	err := c.db.Table(ChatsTable).Where("types = ? AND name LIKE ?", ChatPublic, fmt.Sprintf("%%%s%%", name)).Find(&chats).Error
+	query := fmt.Sprintf("SELECT * FROM %s WHERE types = ? AND name LIKE ? LIMIT 16", ChatsTable)
+	err := c.db.Raw(query, ChatPublic, fmt.Sprintf("%%%s%%", name)).Scan(&chats).Error
 	return chats, err
 }
 

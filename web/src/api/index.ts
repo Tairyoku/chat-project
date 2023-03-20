@@ -5,8 +5,8 @@ const axiosInstanse = axios.create({
   headers: {
     "Access-Control-Allow-Origin":'*',
     'Content-type': 'application/json;charset=UTF-8',
-    'Authorization': window.localStorage.getItem('token')
+    // 'Authorization': 
   }
 });
-
+axiosInstanse.defaults.headers.common.Authorization = window.localStorage.getItem("token")
 export default axiosInstanse;

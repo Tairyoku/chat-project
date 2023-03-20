@@ -64,10 +64,10 @@ export default Vue.extend({
       .then((res) => {
         this.$router.push(`/chat/${res}`);
         this.$store.commit("setChatId", res);
-        if (this.WEB_SOCKET.readyState != undefined) {
-          this.$store.commit("closeSocket");
-        }
-        this.$store.dispatch("openWebsocket", res);
+        // if (this.WEB_SOCKET.readyState != undefined) {
+        //   this.$store.commit("closeSocket");
+        // }
+        // this.$store.dispatch("openWebsocket", res);
         this.$store.dispatch("getUserPrivateChats", this.USER_ID);
       });
     },

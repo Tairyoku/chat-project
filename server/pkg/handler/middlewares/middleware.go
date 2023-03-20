@@ -43,15 +43,16 @@ const (
 
 func (h *MiddlewareHandler) UserIdentify(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
+
 		header := c.Request().Header.Get(authorizationHeader)
 		if header == "" {
-			responses.NewErrorResponse(c, http.StatusUnauthorized, "empty auth header")
+			responses.NewErrorResponse(c, http.StatusNoContent, "empty auth header")
 			return nil
 		}
 
 		userId, err := h.services.Authorization.ParseToken(header)
 		if err != nil {
-			responses.NewErrorResponse(c, http.StatusUnauthorized, "create token error")
+			responses.NewErrorResponse(c, http.StatusResetContent, "token old or wrong")
 			return nil
 		}
 		c.Set(UserCtx, userId)
