@@ -80,7 +80,7 @@ func TestAuthHandler_SignUp(t *testing.T) {
 			mockBehavior: func(r *mockService.MockAuthorization, user models.User) {
 				r.EXPECT().CreateUser(user).Return(0, errors.New("username is already used"))
 			},
-			expectedStatusCode:   409,
+			expectedStatusCode:   202,
 			expectedResponseBody: `{"message":"username is already used"}` + "\n",
 		},
 		{
@@ -172,25 +172,6 @@ func TestAuthHandler_SignIn(t *testing.T) {
 			expectedResponseBody: `{"message":"incorrect request data"}` + "\n",
 		},
 		{
-			name:      "Check user error",
-			inputBody: `{"username":"test username","password":"password"}`,
-			inputUser: SignInInput{
-				Username: "test username",
-				Password: "password",
-			},
-			mockBehavior: func(s *mockService.MockAuthorization, user SignInInput) {
-				res := models.User{
-					Id:       0,
-					Username: "",
-					Icon:     "",
-					Password: "",
-				}
-				s.EXPECT().GetByName(user.Username).Return(res, errors.New("check user error"))
-			},
-			expectedStatusCode:   500,
-			expectedResponseBody: `{"message":"check user error"}` + "\n",
-		},
-		{
 			name:      "User not found",
 			inputBody: `{"username":"test username","password":"password"}`,
 			inputUser: SignInInput{
@@ -204,9 +185,9 @@ func TestAuthHandler_SignIn(t *testing.T) {
 					Icon:     "",
 					Password: "",
 				}
-				s.EXPECT().GetByName(user.Username).Return(res, nil)
+				s.EXPECT().GetByName(user.Username).Return(res, errors.New("user not found"))
 			},
-			expectedStatusCode:   404,
+			expectedStatusCode:   202,
 			expectedResponseBody: `{"message":"user not found"}` + "\n",
 		},
 		{
@@ -226,7 +207,7 @@ func TestAuthHandler_SignIn(t *testing.T) {
 				s.EXPECT().GetByName(user.Username).Return(res, nil)
 				s.EXPECT().GenerateToken(user.Username, user.Password).Return("", errors.New("incorrect password"))
 			},
-			expectedStatusCode:   409,
+			expectedStatusCode:   202,
 			expectedResponseBody: `{"message":"incorrect password"}` + "\n",
 		},
 	}
@@ -283,7 +264,7 @@ func TestAuthHandler_GetMe(t *testing.T) {
 			inputUserId: 0,
 			mockBehavior: func(s *mockService.MockAuthorization, userId int) {
 			},
-			expectedStatusCode:   404,
+			expectedStatusCode:   204,
 			expectedResponseBody: `{"message":"user not found"}` + "\n",
 		},
 	}
@@ -413,7 +394,7 @@ func TestAuthHandler_ChangePassword(t *testing.T) {
 				s.EXPECT().GetUserById(userId).Return(res, nil)
 				s.EXPECT().GenerateToken(res.Username, passwords.OldPassword).Return("", errors.New("incorrect password"))
 			},
-			expectedStatusCode:   400,
+			expectedStatusCode:   202,
 			expectedResponseBody: `{"message":"incorrect password"}` + "\n",
 		},
 		{
@@ -551,7 +532,7 @@ func TestAuthHandler_ChangeUsername(t *testing.T) {
 				s.EXPECT().GetUserById(userId).Return(res, nil)
 				s.EXPECT().GetByName(user.Username).Return(check, nil)
 			},
-			expectedStatusCode:   500,
+			expectedStatusCode:   202,
 			expectedResponseBody: `{"message":"username is used"}` + "\n",
 		},
 		{

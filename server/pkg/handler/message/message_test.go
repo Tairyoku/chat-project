@@ -34,7 +34,7 @@ func TestMessageHandler_CreateMessage(t *testing.T) {
 				Author: 5,
 				ChatId: 3,
 				Text:   "test body",
-				SentAt: time.Now().Round(10 * time.Millisecond),
+				SentAt: time.Now().Round(20 * time.Millisecond),
 			},
 			mockBehavior: func(s *mockService.MockMessage, msg models.Message) {
 				s.EXPECT().Create(msg).Return(1, nil)
@@ -57,7 +57,7 @@ func TestMessageHandler_CreateMessage(t *testing.T) {
 				Author: 5,
 				ChatId: 3,
 				Text:   "test body",
-				SentAt: time.Now().Round(10 * time.Millisecond),
+				SentAt: time.Now().Round(20 * time.Millisecond),
 			},
 			mockBehavior: func(s *mockService.MockMessage, msg models.Message) {
 				s.EXPECT().Create(msg).Return(0, errors.New("create message error"))

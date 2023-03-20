@@ -31,10 +31,10 @@ func NewAuthHandler(services *service.Service) *AuthHandler {
 // @Produce      json
 // @Param        user	body     SignInInput   true  "User data"
 // @Success      200 	{object} TokenResponse	 "result is user token"
+// @Success 	 202 	{object} responses.ErrorResponse	 "username is already used"
 // @Failure 	 400 	{object} responses.ErrorResponse	 "incorrect request data"
 // @Failure 	 400 	{object} responses.ErrorResponse	 "You must enter a username"
 // @Failure 	 400 	{object} responses.ErrorResponse	 "Password must be at least 6 symbols"
-// @Failure 	 409 	{object} responses.ErrorResponse	 "username is already used"
 // @Failure 	 500 	{object} responses.ErrorResponse	 "generate token error"
 // @Router       /auth/sign-up [post]
 func (h *AuthHandler) SignUp(c echo.Context) error {
@@ -50,13 +50,13 @@ func (h *AuthHandler) SignUp(c echo.Context) error {
 	{
 		//username is not empty
 		if len(input.Username) == 0 {
-			responses.NewErrorResponse(c, http.StatusAccepted, "You must enter a username")
+			responses.NewErrorResponse(c, http.StatusBadRequest, "You must enter a username")
 			return nil
 		}
 
 		// password length
 		if len(input.Password) < 6 {
-			responses.NewErrorResponse(c, http.StatusAccepted, "Password must be at least 6 symbols")
+			responses.NewErrorResponse(c, http.StatusBadRequest, "Password must be at least 6 symbols")
 			return nil
 		}
 	}
@@ -100,10 +100,9 @@ type SignInInput struct {
 // @Produce      json
 // @Param        user	body     SignInInput   true  "User data"
 // @Success      200 	{object} TokenResponse  "result is user token"
+// @Success 	 202 	{object} responses.ErrorResponse	 "user not found"
+// @Success 	 202 	{object} responses.ErrorResponse	 "incorrect password"
 // @Failure 	 400 	{object} responses.ErrorResponse	 "incorrect request data"
-// @Failure 	 404 	{object} responses.ErrorResponse	 "user not found"
-// @Failure 	 409 	{object} responses.ErrorResponse	 "incorrect password"
-// @Failure 	 500 	{object} responses.ErrorResponse	 "check user error"
 // @Router       /auth/sign-in [post]
 func (h *AuthHandler) SignIn(c echo.Context) error {
 
@@ -145,7 +144,7 @@ func (h *AuthHandler) SignIn(c echo.Context) error {
 // @Tags         auth
 // @Produce      json
 // @Success      200 	{object} TokenResponse   "result is user ID"
-// @Failure 	 404 	{object} IdResponse	 "user not found"
+// @Success 	 204 	{object} IdResponse	 "user not found"
 // @Router       /auth/get-me [get]
 func (h *AuthHandler) GetMe(c echo.Context) error {
 
@@ -182,9 +181,9 @@ type ChangePassword struct {
 // @Produce      json
 // @Param        passwords	body     ChangePassword  	 true  	 "actual and new password"
 // @Success      200 	{object} MessageResponse   			 "password changed"
+// @Success 	 202 	{object} responses.ErrorResponse	 "incorrect password"
 // @Failure 	 400 	{object} responses.ErrorResponse	 "incorrect request data"
 // @Failure 	 400 	{object} responses.ErrorResponse	 "password must be at least 6 symbols"
-// @Failure 	 400 	{object} responses.ErrorResponse	 "incorrect password"
 // @Failure 	 404 	{object} responses.ErrorResponse	 "incorrect user data"
 // @Failure 	 500 	{object} responses.ErrorResponse	 "update password error"
 // @Router       /auth/change/password [put]
@@ -246,9 +245,9 @@ func (h *AuthHandler) ChangePassword(c echo.Context) error {
 // @Produce      json
 // @Param        username	body     UsernameInput  	 true 	 "New username"
 // @Success      200 	{object} MessageResponse  			 "username changed"
+// @Success 	 202 	{object} responses.ErrorResponse	 "username is used"
 // @Failure 	 400 	{object} responses.ErrorResponse	 "incorrect request data"
 // @Failure 	 404 	{object} responses.ErrorResponse	 "incorrect user data"
-// @Failure 	 500 	{object} responses.ErrorResponse	 "username is used"
 // @Failure 	 500 	{object} responses.ErrorResponse	 "update username error"
 // @Router       /auth/change/username [put]
 func (h *AuthHandler) ChangeUsername(c echo.Context) error {

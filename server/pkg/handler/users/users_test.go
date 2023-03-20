@@ -662,6 +662,9 @@ func TestUsersHandler_DeleteFriend(t *testing.T) {
 					RecipientId:  recipientId,
 					Relationship: "friends",
 				}
+				s.EXPECT().DeleteStatus(status).Return(errors.New("record not found"))
+				status.SenderId = recipientId
+				status.RecipientId = senderId
 				s.EXPECT().DeleteStatus(status).Return(nil)
 			},
 			expectedStatusCode:   200,
@@ -677,6 +680,24 @@ func TestUsersHandler_DeleteFriend(t *testing.T) {
 					RecipientId:  recipientId,
 					Relationship: "friends",
 				}
+				s.EXPECT().DeleteStatus(status).Return(errors.New("some error"))
+			},
+			expectedStatusCode:   500,
+			expectedResponseBody: `{"message":"delete status error"}` + "\n",
+		},
+		{
+			name:             "Second try delete status error",
+			inputSenderId:    13,
+			inputRecipientId: 2,
+			mockBehavior: func(s *mockService.MockStatus, senderId, recipientId int) {
+				status := models.Status{
+					SenderId:     senderId,
+					RecipientId:  recipientId,
+					Relationship: "friends",
+				}
+				s.EXPECT().DeleteStatus(status).Return(errors.New("record not found"))
+				status.SenderId = recipientId
+				status.RecipientId = senderId
 				s.EXPECT().DeleteStatus(status).Return(errors.New("some error"))
 			},
 			expectedStatusCode:   500,

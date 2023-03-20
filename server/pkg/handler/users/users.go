@@ -207,8 +207,8 @@ func (h *UsersHandler) CancelInvite(c echo.Context) error {
 
 	// Видаляємо відносини за моделлю
 	err := h.services.Status.DeleteStatus(status)
-	if err.Error() != "record not found" {
-		if err != nil {
+	if err != nil {
+		if err.Error() != "record not found" {
 			responses.NewErrorResponse(c, http.StatusInternalServerError, "delete status error")
 			return nil
 		}
@@ -303,8 +303,8 @@ func (h *UsersHandler) RefuseInvitation(c echo.Context) error {
 
 	// Видаляємо відносини за моделлю
 	err := h.services.Status.DeleteStatus(status)
-	if err.Error() != "record not found" {
-		if err != nil {
+	if err != nil {
+		if err.Error() != "record not found" {
 			responses.NewErrorResponse(c, http.StatusInternalServerError, "delete status error")
 			return nil
 		}
@@ -352,8 +352,8 @@ func (h *UsersHandler) DeleteFriend(c echo.Context) error {
 
 	// Видаляємо відносини за моделлю
 	err := h.services.Status.DeleteStatus(status)
-	if err.Error() != "record not found" {
-		if err != nil {
+	if err != nil {
+		if err.Error() != "record not found" {
 			responses.NewErrorResponse(c, http.StatusInternalServerError, "delete status error")
 			return nil
 		}
@@ -365,8 +365,8 @@ func (h *UsersHandler) DeleteFriend(c echo.Context) error {
 
 	// Видаляємо відносини за моделлю
 	err = h.services.Status.DeleteStatus(status)
-	if err.Error() != "record not found" {
-		if err != nil {
+	if err != nil {
+		if err.Error() != "record not found" {
 			responses.NewErrorResponse(c, http.StatusInternalServerError, "delete status error")
 			return nil
 		}
@@ -461,8 +461,8 @@ func (h *UsersHandler) DeleteFromBlacklist(c echo.Context) error {
 
 	// Видаляємо відносини за моделлю
 	err := h.services.Status.DeleteStatus(status)
-	if err.Error() != "record not found" {
-		if err != nil {
+	if err != nil {
+		if err.Error() != "record not found" {
 			responses.NewErrorResponse(c, http.StatusInternalServerError, "delete status error")
 			return nil
 		}

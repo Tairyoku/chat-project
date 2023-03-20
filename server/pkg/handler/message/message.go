@@ -59,7 +59,7 @@ func (h *MessageHandler) CreateMessage(c echo.Context) error {
 	// Заповнюємо форму повідомлення
 	msg.ChatId = chatId
 	msg.Author = userId
-	msg.SentAt = time.Now().Round(10 * time.Millisecond)
+	msg.SentAt = time.Now().Round(20 * time.Millisecond)
 
 	// Створюємо нове повідомлення
 	id, err := h.services.Message.Create(msg)

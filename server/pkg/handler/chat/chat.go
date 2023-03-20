@@ -91,7 +91,7 @@ func (h *ChatHandler) CreatePublicChat(c echo.Context) error {
 // @Produce      json
 // @Param        id		path     int   true  "Chat ID"
 // @Success      200 	{object} ChatResponse   "result is chat data"
-// @Failure 	 500 	{object} responses.ErrorResponse	 "get chat error"
+// @Success 	 204 	{object} responses.ErrorResponse	 "get chat error"
 // @Router       /chats/{id} [get]
 func (h *ChatHandler) GetChat(c echo.Context) error {
 
@@ -128,7 +128,7 @@ func (h *ChatHandler) GetChat(c echo.Context) error {
 // @Produce      json
 // @Param        id		path     int   true  "Chat ID"
 // @Success      200 	{object} ChatAndUserResponse   "result is chat data (and user data)"
-// @Failure 	 500 	{object} responses.ErrorResponse	 "no chat error"
+// @Success 	 204 	{object} responses.ErrorResponse	 "no chat error"
 // @Failure 	 500 	{object} responses.ErrorResponse	 "get users error"
 // @Router       /chats/{id}/link [get]
 func (h *ChatHandler) GetById(c echo.Context) error {
@@ -374,6 +374,7 @@ func (h *ChatHandler) AddUserToChat(c echo.Context) error {
 // @Param        id		path     int   true  "Chat ID"
 // @Param        user_id	body     UserIdInput   true  "User ID"
 // @Success      200 	{object} MessageResponse			"user deleted from chat"
+// @Success      202 	{object} MessageResponse			"delete last user from chat and chat"
 // @Failure 	 400 	{object} responses.ErrorResponse	 "incorrect request data"
 // @Failure 	 500 	{object} responses.ErrorResponse	 "delete user error"
 // @Failure 	 500 	{object} responses.ErrorResponse	 "get chat users error"
@@ -432,6 +433,7 @@ func (h *ChatHandler) DeleteUserFromChat(c echo.Context) error {
 		if errRes != nil {
 			return errRes
 		}
+		return nil
 	}
 	// Відгук сервера
 	errRes := c.JSON(http.StatusOK, map[string]interface{}{

@@ -169,7 +169,7 @@ func TestChatHandler_GetChat(t *testing.T) {
 				res := models.Chat{}
 				s.EXPECT().Get(chatId).Return(res, errors.New("get chat error"))
 			},
-			expectedStatusCode:   500,
+			expectedStatusCode:   204,
 			expectedResponseBody: `{"message":"get chat error"}` + "\n",
 		},
 	}
@@ -295,7 +295,7 @@ func TestChatHandler_GetById(t *testing.T) {
 				res := models.Chat{}
 				s.EXPECT().Get(chatId).Return(res, errors.New("no chat error"))
 			},
-			expectedStatusCode:   500,
+			expectedStatusCode:   204,
 			expectedResponseBody: `{"message":"no chat error"}` + "\n",
 		},
 		{
@@ -547,6 +547,7 @@ func TestChatHandler_GetUserPrivateChats(t *testing.T) {
 						{
 							Id:       3,
 							Username: "first",
+							Icon:     "some image name",
 						},
 						{
 							Id:       6,
@@ -803,7 +804,7 @@ func TestChatHandler_DeleteUserFromChat(t *testing.T) {
 				s.EXPECT().Delete(chatId).Return(nil)
 				s.EXPECT().DeleteAllMessages(chatId).Return(nil)
 			},
-			expectedStatusCode:   200,
+			expectedStatusCode:   202,
 			expectedResponseBody: `{"message":"user with id 8 deleted from chat with id 4"}` + "\n",
 		},
 		{
